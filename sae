@@ -1,0 +1,148 @@
+* File: comande_SAErobot.cpp 
+ * Author: Philippe Latu 
+ * Source: https://github.com/platu/libsensehat-cpp 
+ * 
+ * Patron du code source des séances de travaux pratiques 
+ */ 
+ 
+ 
+#include <iostream> 
+#include <iomanip> 
+#include <chrono> 
+#include <thread> 
+ 
+ 
+#include <sensehat.h> 
+ 
+ 
+using namespace std; 
+using namespace std::this_thread; // sleep_for, sleep_until 
+using namespace std::chrono; // system_clock, seconds, milliseconds 
+ 
+ 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+// Début constantes 
+const int capteurDroit=17; 
+const int capteurGauche=16; 
+const int moteurDroit=1; 
+const int moteurGauche=0; 
+// Fin constantes 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+ 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+// Début sous-programmes 
+ 
+ 
+int lirCaptG() 
+{ 
+    return gpioGetInput(16); 
+     
+} 
+int lirCaptD() 
+{ 
+    return gpioGetInput(17); 
+} 
+void moteurG() 
+{ 
+    int varmot; 
+    pwmDutyCycle(0,varmot); 
+} 
+void moteurD() 
+{ 
+    int varmot; 
+    pwmDutyCycle(1,varmot); 
+} 
+void avance() 
+{ 
+     
+    unsigned int pmot = 50; 
+    moteurD(pmot); 
+    moteurG(pmot); 
+    cout<<"on avance"<<endl; 
+ 
+ 
+} 
+void tourng() 
+{ 
+    unsigned int pmot = 50; 
+    moteurD(pmot); 
+    moteurG(0); 
+    cout<<"on tourne a gauche"<< endl; 
+} 
+void tournd() 
+{ 
+    unsigned int pmot = 50; 
+    moteurD(0); 
+    moteurG(pmot); 
+    cout<<"on tourne a droite"<< endl; 
+ 
+ 
+} 
+ 
+ 
+// Fin sous-programmes 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+ 
+int main() { 
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    // Début variables 
+    int capteurD; 
+    int capteurG; 
+     
+    // Fin variables 
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    if(senseInit()) { 
+        cout << "Sense Hat initialization Ok." << endl; 
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+        // Début instructions 
+         
+        gpioSetConfig(17,in); 
+        gpioSetConfig(16,in); 
+        pwmInit(1); 
+        pwmInit(0); 
+        pwmPeriod(1,10000); 
+        pwmPeriod(0,10000); 
+        pwmDutyCycle(1,10000); 
+        pwmDutyCycle(0,10000); 
+        pwmEnable(1); 
+        pwmEnable(0); 
+        for (int i = 0; i < 50; i++) 
+        { 
+            capteurD = lirCaptD(); 
+            capteurG = lirCaptG(); 
+            if(capteurG == 1 && capteurD == 1) 
+            avance(); 
+ 
+ 
+            if(capteurG == 1 && capteurD == 0) 
+            tournd(); 
+ 
+ 
+            if(capteurG == 0 && capteurD == 1) 
+            tourng(); 
+ 
+ 
+        } 
+ 
+ 
+         
+         
+ 
+ 
+        // Fin instructions 
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+        cout << "Press joystick button to quit." << endl; 
+        senseWaitForJoystickEnter(); 
+        senseShutdown(); 
+        cout << "Sense Hat shut down." << endl; 
+        pwmDisable(1); 
+        pwmDisable(0); 
+    } 
+    return EXIT_SUCCESS; 
+} 
+ 
+ 
+ 
+
